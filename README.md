@@ -11,6 +11,34 @@
 - mssql (driver)
 
 #### Steps
+
+Edit mssql.conf in logstash/mssql.conf
+
+```conf
+input {
+  jdbc {
+    jdbc_driver_class => "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    jdbc_connection_string => "jdbc:sqlserver://YOUR_DB_HOST:YOUR_DB_PORT;databaseName=YOUR_DB_NAME;integratedSecurity=false;"
+    jdbc_user => "YOUR_DB_USER"
+    jdbc_password => "YOUR_DB_PASS"
+    # schedule => "0 6 * * * Europe/Paris"
+    schedule => "* * * * *"
+    statement => "SELECT * FROM YOUR_TABLE"
+  }
+}
+
+filter {}
+
+output {
+  elasticsearch {
+    hosts => "YOUR_HOST_ES"
+    index => "YOUR_INDEX"
+    document_id => "%{YOUR_ID_REFERENCES}"
+  }
+}
+
+```
+
 ```bash
 # Starting containers
 $ docker-compose up -d
