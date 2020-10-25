@@ -1,0 +1,38 @@
+version: "3"
+services:
+
+  elasticsearch:
+    image: elasticsearch:7.9.0
+    container_name: dwh_elastic
+    restart: always
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  kibana:
+    image: kibana:7.9.0
+    container_name: dwh_kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+
+  logstash:
+    image: logstash:7.9.0
+    container_name: dwh_logstash
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5001:5001
+    volumes:
+      - ./logstash:/etc/logstash/conf.d
+    command: bash -c "cp /etc/logstash/conf.d/drivers/mssql-jdbc-8.4.1.jre11.jar logstash-core/lib/jars/"
+    command: bash -c "logstash -f /etc/logstash/conf.d/mssql.conf && bin/logstash-plugin install logstash-filter-translate logstash-input-jdbc"
+
+networks:
+  backend:
+
+# volumes:
+#   db-data:
